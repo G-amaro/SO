@@ -12,6 +12,6 @@ estrutura do projeto:
 │── /obj          → Arquivos objeto (.o)
 │── /tmp          → Pipes nomeados e temporários (gerado no runtime)
 │── /tests        → Arquivos de teste (se necessário)
-│── Makefile      → Compilação automatizada
+│── Makefile      → Compilação
 │── enunciado     → Descrição do projeto
 │── relatorio     → Relatório do projeto
