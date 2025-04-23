@@ -5,30 +5,35 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "utils.h"
 
 #define FIFO_PATH "/tmp/dserver_fifo"
 #define FIFO_RESP_PATH "/tmp/dclient_fifo"
 
 // Função para criar a mensagem a ser enviada ao servidor
-char* make_mensagem(char *argv[]) {
+char* make_mensagem(int argc, char *argv[]) {
     char *mensagem = (char*)malloc(512 * sizeof(char));
     if (mensagem == NULL) {
         perror("Erro ao alocar memória para mensagem");
         return NULL;
     }
+    if (argc == 6 && strcmp(argv[1],"-a") == 0) {
 
-    // Montar a mensagem no formato "operação|title|authors|year|path"
-    snprintf(mensagem, 512, "%s|%s|%s|%s|%s", argv[1], argv[2], argv[3], argv[4], argv[5]);
+        snprintf(mensagem, 512, "%s|%s|%s|%s|%s", argv[1], argv[2], argv[3], argv[4], argv[5]);
+
+    } else if (argc == 3){
+        if(strcmp(argv[1],"-c") == 0 || strcmp(argv[1],"-d") == 0){
+            //operação e key
+            snprintf(mensagem, 512, "%s|%s", argv[1], argv[2]);
+        }
+    }
+
+
 
     return mensagem;
 }
 
 int main(int argc, char *argv[]) {
-    // Verificar o número de argumentos
-    if (argc != 6) {
-        fprintf(stderr, "Uso: %s -a <title> <authors> <year> <path>\n", argv[0]);
-        return 1;
-    }
 
     // Abrir o FIFO para escrita
     int fd = open(FIFO_PATH, O_WRONLY);
@@ -38,7 +43,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Gerar a mensagem a ser enviada
-    char* mensagem = make_mensagem(argv);
+    char* mensagem = make_mensagem(argc, argv);
     if (mensagem == NULL) {
         fprintf(stderr, "Erro ao criar mensagem.\n");
         close(fd);
@@ -75,7 +80,7 @@ int main(int argc, char *argv[]) {
     }
 
     resposta[n] = '\0'; // Garantir que a resposta termina com '\0'
-    printf("ID do documento indexado: %s\n", resposta);
+    printf("%s\n", resposta);
 
     close(fd_resp);
     return 0;

@@ -17,8 +17,8 @@ folders:
 	@mkdir -p src include obj bin tmp
 	@echo "Diretórios src, include, obj, bin e tmp criados com sucesso."
 
-# Compilar bin/dserver
-bin/dserver: obj/dserver.o
+# Compilar bin/dserver com dependência da lista ligada
+bin/dserver: obj/dserver.o obj/manipulacao_listaligada.o
 	$(CC) $(LDFLAGS) $^ -o $@
 	@echo "dserver compilado com sucesso!"
 
