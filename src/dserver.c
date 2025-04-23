@@ -5,24 +5,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "utils.h"
 #include "manipulacao_listaligada.h"
 
-#define FIFO_PATH "/tmp/dserver_fifo"
-#define FIFO_RESP_PATH "/tmp/dclient_fifo"
 
-void send_response_to_client(const char* resposta) {
-    // Abrindo o FIFO de resposta
-    int fd_resp = open(FIFO_RESP_PATH, O_WRONLY);
-    if (fd_resp == -1) {
-        perror("Erro ao abrir o FIFO de resposta");
-        return;
-    }
-
-    // Enviando a resposta para o cliente
-    write(fd_resp, resposta, strlen(resposta) + 1);  // +1 para incluir o '\0' no final
-    close(fd_resp);
-}
 
 int main() {
     // Criando os FIFOs
@@ -88,13 +75,9 @@ int main() {
 
             if(key) {
                 printf("Operação '-c' consultar: %s\n", key);
-                //funcao
-            
-                char resposta[100];
-                snprintf(resposta, sizeof(resposta), "Documento com ID=%s consultado", key);
-            
-                send_response_to_client(resposta);
-            }
+                
+                send_response_to_client(search_document(key));
+            }   
 
         } else if (strncmp(mensagem ,"-d", 2) == 0) {
             char* key = strtok(mensagem + 3, "|");

@@ -7,11 +7,16 @@ Document* document_list = NULL;
 int next_id = 1;
 
 char* add_document(char* title, char* authors, char* year, char* path) {
-    static char resposta[256];
+    char* resposta = (char*)malloc(512 * sizeof(char)); 
+    if (!resposta) {
+        perror("Erro ao alocar memória para resposta");
+        return NULL;
+    }
+
     Document* new_doc = (Document*)malloc(sizeof(Document));
     if (!new_doc) {
         perror("Erro ao alocar memória para documento");
-        snprintf(resposta, sizeof(resposta), "Não foi possível indexar o documento.");
+        snprintf(resposta, 512, "Não foi possível indexar o documento.");
         return resposta;
     }
 
@@ -27,14 +32,19 @@ char* add_document(char* title, char* authors, char* year, char* path) {
     new_doc->next = document_list;
     document_list = new_doc;
 
-    snprintf(resposta, sizeof(resposta), "Documento indexado: ID=%d, Title=%s, Authors=%s, Year=%s, Path=%s",
+    snprintf(resposta, 512, "Documento indexado: ID=%d, Title=%s, Authors=%s, Year=%s, Path=%s",
              new_doc->id, new_doc->title, new_doc->authors, new_doc->year, new_doc->path);
     printf("%s\n", resposta);
     return resposta;
 }
 
 char* delete_document(char* key) {
-    static char resposta[100];
+    char* resposta = (char*)malloc(512 * sizeof(char));
+    if (!resposta) {
+        perror("Erro ao alocar memória para resposta");
+        return NULL;
+    }
+
     int id_to_delete = atoi(key);
     Document* current = document_list;
     Document* previous = NULL;
@@ -46,7 +56,7 @@ char* delete_document(char* key) {
             } else {
                 previous->next = current->next;
             }
-            snprintf(resposta, sizeof(resposta), "Documento com ID=%d eliminado.", current->id);
+            snprintf(resposta, 512, "Documento com ID=%d eliminado.", current->id);
             printf("%s\n", resposta);
             free(current);
             return resposta;
@@ -55,10 +65,42 @@ char* delete_document(char* key) {
         current = current->next;
     }
 
-    snprintf(resposta, sizeof(resposta), "Documento com ID=%d não encontrado.", id_to_delete);
+    snprintf(resposta, 512, "Documento com ID=%d não encontrado.", id_to_delete);
     printf("%s\n", resposta);
     return resposta;
 }
+
+char* search_document(char* key) {
+    // Alocando memória suficiente para a resposta
+    char* resposta = (char*)malloc(512 * sizeof(char));
+    if (!resposta) {
+        perror("Erro ao alocar memória para resposta");
+        return NULL;
+    }
+
+    int id_to_search = atoi(key);
+    Document* current = document_list;
+    
+    printf("Procurando documento com ID=%d\n", id_to_search);  // Print de depuração
+
+    while (current != NULL) {
+        printf("Verificando documento ID=%d\n", current->id);  // Print de depuração
+        if (current->id == id_to_search) {
+            // Passando o tamanho correto da memória alocada
+            snprintf(resposta, 512, "Documento com ID=%d consultado.\n  -title: %s;\n  -authors: %s;\n  -year: %s;\n  -path: %s;\n", 
+                     current->id, current->title, current->authors, current->year, current->path);
+            printf("%s\n", resposta);
+            return resposta;
+        }
+        current = current->next;
+    }
+
+    // Se não encontrar o documento, retorna uma mensagem de erro
+    snprintf(resposta, 512, "Documento com ID=%d não encontrado", id_to_search);
+    printf("%s\n", resposta);  // Print de depuração
+    return resposta;
+}
+
 
 void free_documents() {
     Document* current = document_list;
@@ -69,4 +111,4 @@ void free_documents() {
         current = next;
     }
     document_list = NULL;
-} 
+}

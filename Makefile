@@ -17,13 +17,13 @@ folders:
 	@mkdir -p src include obj bin tmp
 	@echo "Diretórios src, include, obj, bin e tmp criados com sucesso."
 
-# Compilar bin/dserver com dependência da lista ligada
-bin/dserver: obj/dserver.o obj/manipulacao_listaligada.o
+# Compilar bin/dserver
+bin/dserver: obj/dserver.o obj/manipulacao_listaligada.o obj/utils.o
 	$(CC) $(LDFLAGS) $^ -o $@
 	@echo "dserver compilado com sucesso!"
 
 # Compilar bin/dclient
-bin/dclient: obj/dclient.o
+bin/dclient: obj/dclient.o obj/utils.o
 	$(CC) $(LDFLAGS) $^ -o $@
 	@echo "dclient compilado com sucesso!"
 

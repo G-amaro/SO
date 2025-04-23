@@ -14,6 +14,7 @@ typedef struct Document {
 // Funções públicas da manipulação de documentos
 char* add_document(char* title, char* authors, char* year, char* path);
 char* delete_document(char* key);
+char* search_document(char* key);
 void free_documents();
 
 #endif // MANIPULACAO_LISTALIGADA_H

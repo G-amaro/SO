@@ -7,8 +7,7 @@
 #include <stdlib.h>
 #include "utils.h"
 
-#define FIFO_PATH "/tmp/dserver_fifo"
-#define FIFO_RESP_PATH "/tmp/dclient_fifo"
+
 
 // Função para criar a mensagem a ser enviada ao servidor
 char* make_mensagem(int argc, char *argv[]) {
