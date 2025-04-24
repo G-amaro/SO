@@ -10,19 +10,19 @@
 #include "lista_ligada.h"
 #include "ficheiro_presistencia.h"  // Incluir o arquivo de persistência
 
-int next_id = 1;
+int next_id = 0;
 
-int main() {
+
+
+int main(int argc, char *argv[]) {
+    
     // Inicializar o arquivo de persistência, carregando os documentos no servidor
+    clear_persistence_file();
+    init_persistence_file();
+    list_documents_in_persistence();
+    next_id = load_documents_and_get_max_id() + 1;
+    list_documents();
 
-    // init_persistence_file();
-    // list_documents_in_persistence();
-    // next_id = get_max_id_from_persistence() + 1;
-    // load_documents_from_persistence();
-    // list_documents();
-    
-
-    
     if (access(FIFO_PATH, F_OK) == -1) {
         if (mkfifo(FIFO_PATH, 0666) == -1) {
             perror("Erro ao criar o FIFO");
@@ -43,7 +43,6 @@ int main() {
         printf("FIFO de resposta já existe.\n");
     }
 
-    
     int fd = open(FIFO_PATH, O_RDONLY);
     if (fd == -1) {
         perror("Erro ao abrir o FIFO");
@@ -65,61 +64,119 @@ int main() {
 
         mensagem[n] = '\0';  // Garantir que a string seja terminada corretamente
 
-        
-        if (strncmp(mensagem, "-a", 2) == 0) {
-            
-            char* title = strtok(mensagem + 3, "|");
-            char* authors = strtok(NULL, "|");
-            char* year = strtok(NULL, "|");
-            char* path = strtok(NULL, "|");
+        char operacao = mensagem[1];  // Assumimos que as mensagens vêm com o formato "-x ..."
 
-            if (title && authors && year && path) {
-                char* resposta = add_document(title, authors, year, path, &next_id);
+        switch (operacao) {
+            case 'a': {
+                char* title = strtok(mensagem + 3, "|");
+                char* authors = strtok(NULL, "|");
+                char* year = strtok(NULL, "|");
+                char* path = strtok(NULL, "|");
+                int exists = 0;
 
-                // Adicionar o documento ao arquivo de persistência
-                Document* new_doc = document_list;  // Novo documento adicionado à lista
-                // add_to_persistence_file(new_doc);
-
-                // Enviar a resposta ao cliente
-                send_response_to_client(resposta);
+                if (title && authors && year && path) {
+                    char* resposta = add_document(title, authors, year, path, &next_id, &exists);
+                    Document* new_doc = document_list;  // Aponta para o novo documento
+                    add_to_persistence_file(new_doc, &exists);
+                    send_response_to_client(resposta);
+                }
+                list_documents_in_persistence();
+                list_documents();
+                break;
             }
-        } else if (strncmp(mensagem ,"-c", 2) == 0) {
-            char* key = strtok(mensagem + 3, "|");
 
-            if(key) {
-                printf("Operação '-c' consultar: %s\n", key);
-                
-                char* resposta = search_document(key);
-                
-                // Enviar a resposta ao cliente
-                send_response_to_client(resposta);
-            }   
-
-        } else if (strncmp(mensagem ,"-d", 2) == 0) {
-            char* key = strtok(mensagem + 3, "|");
-
-            if(key) {
-                printf("Operação '-d' eliminar: %s\n", key);
-
-                // Remover o documento da lista e do arquivo de persistência
-                char* resposta = delete_document(key);
-                // remove_from_persistence_file(atoi(key)); // Passa o ID do documento para remoção da persistência
-
-                // Enviar a resposta ao cliente
-                send_response_to_client(resposta);
+            case 'c': {
+                char* key = strtok(mensagem + 3, "|");
+                if (key) {
+                    printf("Operação '-c' consultar: %s\n", key);
+                    char* resposta = search_document(key);
+                    send_response_to_client(resposta);
+                }
+                break;
             }
-        } else {
-            printf("Operação desconhecida: %s\n", mensagem);
+
+            case 'd': {
+                char* key = strtok(mensagem + 3, "|");
+                if (key) {
+                    printf("Operação '-d' eliminar: %s\n", key);
+                    char* resposta = delete_document(key);
+                    remove_from_persistence_file(atoi(key));
+                    send_response_to_client(resposta);
+                }
+                list_documents_in_persistence();
+                list_documents();
+                break;
+            }
+
+            case 'l': {
+                char* id = strtok(mensagem + 3, "|");
+                char* keyword = strtok(NULL, "|");
+                char* folder = argv[1];  // Diretório fornecido como argumento
+                
+                // Obter o caminho do ficheiro
+                char* filename = get_path_by_id(atoi(id));
+                
+                if (!filename) {
+                    printf("Arquivo não encontrado\n");
+                    break;
+                }
+                
+                // Construir o caminho completo para o arquivo
+                char path[strlen(folder) + strlen(filename) + 3];  
+                snprintf(path, sizeof(path), "%s/%s", folder, filename);
+                printf("path: %s\n",path);
+                // Procurar a palavra-chave no arquivo
+                int num_linhas = search_in_file(path, keyword);
+                
+                if (num_linhas >= 0) {
+                    char resposta[256];
+                    snprintf(resposta, sizeof(resposta), "Número de linhas contendo '%s': %d", keyword, num_linhas);
+                    send_response_to_client(resposta);
+                }
+                break;
+            }
+            case 's':
+                int counter = 0;
+                char* folder = argv[1]; 
+                Document* current = document_list;
+                char* keyword = strtok(mensagem + 3, "|");
+
+                while (current != NULL) {
+                    
+                    char* folder = argv[1];  // Diretório fornecido como argumento
+                    
+                    // Obter o caminho do ficheiro
+                    char* filename = current->path;
+                    
+                    // Construir o caminho completo para o arquivo
+                    char path[strlen(folder) + strlen(filename) + 3];  
+                    snprintf(path, sizeof(path), "%s/%s", folder, filename);
+
+                    // Procurar a palavra-chave no arquivo
+                    int num_linhas = search_in_file_once(path, keyword);
+                    if(num_linhas){
+                        counter++;
+                    }
+                    current = current->next;
+                }
+                char resposta[256];
+                snprintf(resposta, sizeof(resposta), "Número de documentos contendo '%s': %d", keyword, counter);
+                send_response_to_client(resposta);
+                break;
+
+                
+            default:
+                printf("Operação desconhecida: %s\n", mensagem);
+                break;
         }
-        // list_documents_in_persistence();
+        
     }
 
     close(fd);
     free_documents();  // Liberar a memória dos documentos
 
     // Salvar os documentos restantes no arquivo de persistência antes de sair
-    // save_documents_to_persistence();
+    save_documents_to_persistence();
     
-
     return 0;
 }

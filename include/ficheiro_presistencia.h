@@ -3,16 +3,14 @@
 
 #include "lista_ligada.h"
 
-#define PERSISTENCE_FILE "/tmp/documentos.db"
-
+#define PERSISTENCE_FILE "/tmp/documents.bin"
+#define TEMP_FILE "/tmp/temp.bin"
 
 void init_persistence_file();
 
-void add_to_persistence_file(Document* doc) ;
+void add_to_persistence_file(Document* doc, int* exists) ;
 
 void remove_from_persistence_file(int id);
-
-void load_documents_from_persistence();
 
 void save_documents_to_persistence();
 
@@ -20,5 +18,6 @@ void list_documents_in_persistence();
 
 void clear_persistence_file();
 
-int get_max_id_from_persistence();
+int load_documents_and_get_max_id();
+
 #endif

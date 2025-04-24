@@ -5,7 +5,8 @@
 
 Document* document_list = NULL;
 
-char* add_document(char* title, char* authors, char* year, char* path, int* next_id) {
+
+char* add_document(char* title, char* authors, char* year, char* path, int* next_id, int* exists) {
     char* resposta = (char*)malloc(512 * sizeof(char)); 
     if (!resposta) {
         perror("Erro ao alocar memória para resposta");
@@ -25,6 +26,7 @@ char* add_document(char* title, char* authors, char* year, char* path, int* next
     while (current != NULL) {
         if (strcmp(current->path, path) == 0) {
             snprintf(resposta, 512, "Documento com path = %s já existe na lista ligada", current->path);
+            *exists=1;
             printf("%s\n", resposta);
             return resposta;
         }
@@ -49,6 +51,7 @@ char* add_document(char* title, char* authors, char* year, char* path, int* next
     printf("%s\n", resposta);
     return resposta;
 }
+
 
 
 char* delete_document(char* key) {
@@ -119,7 +122,7 @@ void list_documents() {
         return;
     }
 
-    printf("Lista de documentos:\n");
+    printf("Lista de documentos da lista ligada:\n");
     printf("----------------------\n");
     
     while (current != NULL) {
@@ -132,6 +135,17 @@ void list_documents() {
         
         current = current->next;
     }
+}
+
+char* get_path_by_id(int id) {
+    Document* current = document_list;
+    while (current != NULL) {
+        if (current->id == id) {
+            return current->path;  // Retorna diretamente o ponteiro para o path
+        }
+        current = current->next;
+    }
+    return NULL;  // Se não encontrar o documento
 }
 
 
