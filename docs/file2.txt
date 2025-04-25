@@ -5,5 +5,5 @@ A palavra-chave a ser procurada será "teste".
 Primeiro, a palavra "teste" aparece aqui no início do arquivo.
 Em seguida, a palavra "teste" também aparece novamente mais abaixo no texto.
 A função de pesquisa deve ser capaz de contar todas as ocorrências de "teste" neste arquivo.
-
+sistema
 Por fim, é importante que a pesquisa seja sensível a maiúsculas e minúsculas, ou seja, "Teste" e "teste" devem ser tratados separadamente.

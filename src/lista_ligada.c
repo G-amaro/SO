@@ -41,21 +41,24 @@ char* add_document(char* title, char* authors, char* year, char* path, int next_
         current = current->next;
     }
 
-    new_doc->id = next_id; // Usar o valor de next_id
-      // Incrementar next_id
+    new_doc->id = next_id; 
 
     strncpy(new_doc->title, title, 200);
     new_doc->title[200] = '\0';
+
     strncpy(new_doc->authors, authors, 200);
     new_doc->authors[200] = '\0';
+
     strncpy(new_doc->year, year, 4);
     new_doc->year[4] = '\0';
+
     strncpy(new_doc->path, path, 64);
     new_doc->path[64] = '\0';
+
     new_doc->next = document_list;
     document_list = new_doc;
 
-    snprintf(resposta, 512, "Documento indexado: ID=%d, Title=%s, Authors=%s, Year=%s, Path=%s", new_doc->id, new_doc->title, new_doc->authors, new_doc->year, new_doc->path);
+    snprintf(resposta, 512, "Document %d indexed\n", new_doc->id);
     printf("%s\n", resposta);
     return resposta;
 }
@@ -80,8 +83,7 @@ char* delete_document(char* key) {
             } else {
                 previous->next = current->next;
             }
-            snprintf(resposta, 512, "Documento com ID=%d eliminado.", current->id);
-            printf("%s\n", resposta);
+            snprintf(resposta, 512, "Index entry %d deleted\n", current->id);
             free(current);
             return resposta;
         }
@@ -109,9 +111,7 @@ char* search_document(char* key) {
         
         if (current->id == id_to_search) {
             
-            snprintf(resposta, 512, "Documento com ID=%d consultado.\n  -title: %s;\n  -authors: %s;\n  -year: %s;\n  -path: %s;\n", 
-                     current->id, current->title, current->authors, current->year, current->path);
-            printf("%s\n", resposta);
+            snprintf(resposta, 512, "Title: %s;\nAuthors: %s;\nYear: %s;\nPath: %s;\n", current->title, current->authors, current->year, current->path);
             return resposta;
         }
         current = current->next;

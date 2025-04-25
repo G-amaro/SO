@@ -93,7 +93,18 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             }
-
+            case 'f': {
+                printf("Comando de término recebido. Encerrando servidor...\n");
+                send_response_to_client("Server is shuting down");
+                save_documents_to_persistence();   // Grava dados no ficheiro
+                free_documents();                  // Liberta a memória usada pela lista ligada
+                
+                close(fd);                         // Fecha o FIFO principal
+                unlink(FIFO_PATH);                 // Remove os FIFOs
+                unlink(FIFO_RESP_PATH);
+            
+                exit(0);                           // Encerra o processo servidor
+            }
             default:
                 printf("Operação desconhecida: %s\n", mensagem);
                 break;

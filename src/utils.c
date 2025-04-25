@@ -18,21 +18,19 @@ char* make_mensagem(int argc, char *argv[]) {
     }
 
     switch (argc) {
-        case 6:
-            if (strcmp(argv[1], "-a") == 0) {
-                // operação -a title authors year path
-                snprintf(mensagem, 512, "%s|%s|%s|%s|%s", argv[1], argv[2], argv[3], argv[4], argv[5]);
-            } else {
-                free(mensagem);
-                return NULL;
+        case 2:
+            if (strcmp(argv[1], "-f") == 0){
+                snprintf(mensagem, 512, "%s", argv[1]);
             }
             break;
-
         case 3:
-            if (strcmp(argv[1], "-c") == 0 || strcmp(argv[1], "-d") == 0 || strcmp(argv[1], "-s")==0) {
+            if (strcmp(argv[1], "-c") == 0 || strcmp(argv[1], "-d") == 0) {
 
                 snprintf(mensagem, 512, "%s|%s", argv[1], argv[2]);
-            } else {
+            } else if(strcmp(argv[1], "-s")==0){
+                snprintf(mensagem, 512, "%s|%s|%d", argv[1], argv[2], 0);
+            }
+            else {
                 free(mensagem);
                 return NULL;
             }
@@ -42,6 +40,17 @@ char* make_mensagem(int argc, char *argv[]) {
             if (strcmp(argv[1], "-l") == 0) {
                 // operação -l com key e palavra-chave
                 snprintf(mensagem, 512, "%s|%s|%s", argv[1], argv[2], argv[3]);
+            } else if(strcmp(argv[1], "-s")==0){
+                snprintf(mensagem, 512, "%s|%s|%d|%s", argv[1], argv[2], 1, argv[3]);
+            }else {
+                free(mensagem);
+                return NULL;
+            }
+            break;
+        case 6:
+            if (strcmp(argv[1], "-a") == 0) {
+                // operação -a title authors year path
+                snprintf(mensagem, 512, "%s|%s|%s|%s|%s", argv[1], argv[2], argv[3], argv[4], argv[5]);
             } else {
                 free(mensagem);
                 return NULL;

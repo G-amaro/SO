@@ -40,5 +40,5 @@ obj/operações/%.o: src/operações/%.c
 
 # Limpar arquivos compilados
 clean:
-	rm -f obj/* tmp/* bin/*
+	rm -rf obj tmp bin
 	@echo "Arquivos compilados limpos com sucesso."
