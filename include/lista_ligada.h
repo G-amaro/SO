@@ -17,7 +17,7 @@ extern Document* document_list;
 
 // Funções públicas da manipulação de documentos
 int get_first_document_id();
-char* add_document(char* title, char* authors, char* year, char* path, int* next_id, int* exists);
+char* add_document(char* title, char* authors, char* year, char* path, int next_id, int* exists);
 char* delete_document(char* key);
 char* search_document(char* key);
 void list_documents();

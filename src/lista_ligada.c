@@ -5,8 +5,16 @@
 
 Document* document_list = NULL;
 
+int get_first_document_id() {
+    if (document_list == NULL) {
+        printf("A lista de documentos está vazia.\n");
+        return 0;  // Retorna -1 se a lista estiver vazia
+    }
 
-char* add_document(char* title, char* authors, char* year, char* path, int* next_id, int* exists) {
+    return document_list->id;  // Retorna o ID do primeiro documento
+}
+
+char* add_document(char* title, char* authors, char* year, char* path, int next_id, int* exists) {
     char* resposta = (char*)malloc(512 * sizeof(char)); 
     if (!resposta) {
         perror("Erro ao alocar memória para resposta");
@@ -33,8 +41,8 @@ char* add_document(char* title, char* authors, char* year, char* path, int* next
         current = current->next;
     }
 
-    new_doc->id = *next_id; // Usar o valor de next_id
-    (*next_id)++;  // Incrementar next_id
+    new_doc->id = next_id; // Usar o valor de next_id
+      // Incrementar next_id
 
     strncpy(new_doc->title, title, 200);
     new_doc->title[200] = '\0';

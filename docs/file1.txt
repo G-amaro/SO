@@ -12,7 +12,7 @@ A falta de documentação pode comprometer manutenções futuras.
 Diversos times trabalham simultaneamente em diferentes partes do produto.
 O versionamento de código ajuda a manter o controle das alterações feitas ao longo do tempo.
 Revisões de código são práticas comuns para garantir qualidade.
-Mesmo com tantos cuidados, erros podem surgir em produção. arquivo
+Mesmo com tantos cuidados, erros podem surgir em produção. 
 Por isso, ferramentas de monitorização são essenciais para identificar problemas rapidamente.
 Automação de testes também é uma grande aliada na detecção de falhas.
 O feedback dos utilizadores contribui significativamente para a evolução da solução.

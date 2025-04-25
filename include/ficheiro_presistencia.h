@@ -18,6 +18,8 @@ void list_documents_in_persistence();
 
 void clear_persistence_file();
 
-int load_documents_and_get_max_id();
+void load_documents();
+
+int get_last_document_id();
 
 #endif

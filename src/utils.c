@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "utils.h"
+#include <sys/wait.h>
+
 
 
 
@@ -65,90 +67,89 @@ void send_response_to_client(const char* resposta) {
     close(fd_resp);
 }
 
-
-int search_in_file(char* path, char* keyword) {
-    int fd = open(path, O_RDONLY);
-    if (fd == -1) {
-        perror("Erro ao abrir o ficheiro");
+// Devolve número de linhas que contêm a keyword ou -1 em caso de erro
+int search_in_file(const char* path, const char* keyword) {
+    int pipefd[2];
+    if (pipe(pipefd) == -1) {
+        perror("Erro ao criar pipe");
         return -1;
     }
 
-    char buffer[1024];
-    char linha[2048] = {0};
-    ssize_t bytesRead;
-    int count = 0;
-    size_t linha_pos = 0;
-    size_t keyword_len = strlen(keyword);
-
-    while ((bytesRead = read(fd, buffer, sizeof(buffer))) > 0) {
-        for (ssize_t i = 0; i < bytesRead; i++) {
-            if (buffer[i] == '\n' || linha_pos >= sizeof(linha) - 1) {
-                linha[linha_pos] = '\0';
-
-                if (strstr(linha, keyword)) {
-                    count++;
-                }
-
-                linha_pos = 0;
-                linha[0] = '\0';
-            } else {
-                linha[linha_pos++] = buffer[i];
-            }
-        }
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("Erro ao fazer fork");
+        return -1;
     }
 
-    if (linha_pos > 0) {  // processar última linha se não terminar com '\n'
-        linha[linha_pos] = '\0';
-        if (strstr(linha, keyword)) {
-            count++;
-        }
-    }
+    if (pid == 0) {
+        // Processo filho
+        close(pipefd[0]); // Fecha leitura
 
-    close(fd);
-    return count;
+        // Redireciona stdout para o pipe
+        dup2(pipefd[1], STDOUT_FILENO);
+        close(pipefd[1]);
+
+        // Executa grep -c keyword path
+        execlp("grep", "grep", "-c", keyword, path, NULL);
+
+        // Se execlp falhar
+        perror("Erro no execlp");
+        exit(1);
+    } else {
+        // Processo pai
+        close(pipefd[1]); // Fecha escrita
+
+        char buffer[32] = {0};
+        read(pipefd[0], buffer, sizeof(buffer));
+        close(pipefd[0]);
+
+        wait(NULL); // Espera que o filho termine
+
+        return atoi(buffer);  // Converte e devolve o número de linhas
+    }
 }
 
-
 int search_in_file_once(char* path, char* keyword) {
-    int fd = open(path, O_RDONLY);
-    if (fd == -1) {
-        perror("Erro ao abrir o ficheiro");
-        return -1;
+    int pipefd[2];
+    if (pipe(pipefd) == -1) {
+        perror("Erro ao criar pipe");
+        return 0;
     }
 
-    char buffer[1024];
-    char linha[2048];
-    ssize_t bytesRead;
-    size_t linha_pos = 0;
-
-    while ((bytesRead = read(fd, buffer, sizeof(buffer))) > 0) {
-        for (ssize_t i = 0; i < bytesRead; i++) {
-            // Se encontrar nova linha ou o buffer de linha estiver cheio
-            if (buffer[i] == '\n' || linha_pos >= sizeof(linha) - 1) {
-                linha[linha_pos] = '\0';  // Termina a string da linha
-
-                // Verifica se a palavra-chave está presente na linha
-                if (strstr(linha, keyword)) {
-                    close(fd);
-                    return 1;  // Palavra-chave encontrada
-                }
-
-                linha_pos = 0;  // Reseta a posição para a próxima linha
-            } else {
-                linha[linha_pos++] = buffer[i];  // Adiciona o caractere à linha
-            }
-        }
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("Erro ao fazer fork");
+        return 0;
     }
 
-    // Processa a última linha se não terminar com '\n'
-    if (linha_pos > 0) {
-        linha[linha_pos] = '\0';
-        if (strstr(linha, keyword)) {
-            close(fd);
+    if (pid == 0) {
+        // Processo filho
+        close(pipefd[0]); // Fecha leitura do pipe
+
+        // Redireciona stdout para o pipe
+        dup2(pipefd[1], STDOUT_FILENO);
+        close(pipefd[1]);
+
+        // Executa o comando grep -q para verificar se o arquivo contém a palavra-chave
+        execlp("grep", "grep", "-q", keyword, path, (char*)NULL);
+
+        // Se execlp falhar
+        perror("Erro ao executar execlp");
+        exit(1);
+    } else {
+        // Processo pai
+        close(pipefd[1]); // Fecha escrita do pipe
+
+        int status;
+        waitpid(pid, &status, 0);  // Espera o processo filho terminar
+
+        // Verifica o status do filho
+        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+            close(pipefd[0]);
             return 1;  // Palavra-chave encontrada
         }
-    }
 
-    close(fd);
-    return 0;  // Palavra-chave não encontrada
+        close(pipefd[0]);
+        return 0;  // Palavra-chave não encontrada
+    }
 }

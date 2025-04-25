@@ -130,32 +130,52 @@ void clear_persistence_file() {
 
     close(fd);
 }
-int load_documents_and_get_max_id() {
-    int max_id = 0;
+
+void load_documents() {
     int fd = open(PERSISTENCE_FILE, O_RDONLY);
     if (fd == -1) {
         perror("Erro ao abrir o ficheiro de persistência para leitura");
-        return -1;
     }
 
     Document doc;
     while (read(fd, &doc, sizeof(Document)) > 0) {
-        if (doc.id > max_id) {
-            max_id = doc.id;
-        }
-
+        // Criação de um novo documento na lista
         Document* new_doc = (Document*)malloc(sizeof(Document));
         if (!new_doc) {
             perror("Erro ao alocar memória para documento");
             close(fd);
-            return -1;
-        }
+                }
 
         *new_doc = doc;  // Copiar os dados do documento
         new_doc->next = document_list;
         document_list = new_doc;
     }
 
+    close(fd);  // Retorna 0 porque não estamos mais verificando o máximo ID
+}
+int get_last_document_id() {
+    // Abrir o arquivo de persistência em modo leitura
+    int fd = open(PERSISTENCE_FILE, O_RDONLY);
+    if (fd == -1) {
+        perror("Erro ao abrir o arquivo de persistência para leitura");
+        return -1;
+    }
+
+    // Obter o tamanho do arquivo
+    off_t file_size = lseek(fd, 0, SEEK_END);
+    if (file_size <= 0) {
+        close(fd);
+        return 0;  // Arquivo vazio
+    }
+
+    // Posicionar o ponteiro do arquivo no início do último documento
+    off_t offset = file_size - sizeof(Document);
+    lseek(fd, offset, SEEK_SET);
+
+    // Ler o último documento
+    Document last_doc;
+    ssize_t bytes_read = read(fd, &last_doc, sizeof(Document));
     close(fd);
-    return max_id;
-} 
+
+    return (bytes_read == sizeof(Document)) ? last_doc.id : -1;
+}
