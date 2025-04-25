@@ -14,11 +14,11 @@ dclient: bin/dclient
 
 # Criar diretórios
 folders:
-	@mkdir -p src include obj bin tmp
-	@echo "Diretórios src, include, obj, bin e tmp criados com sucesso."
+	@mkdir -p src include obj/operações bin tmp
+	@echo "Diretórios src, include, obj/operações, bin, tmp criados com sucesso."
 
 # Compilar bin/dserver
-bin/dserver: obj/dserver.o obj/lista_ligada.o obj/utils.o obj/ficheiro_presistencia.o
+bin/dserver: obj/dserver.o obj/lista_ligada.o obj/utils.o obj/ficheiro_presistencia.o obj/operações/adicionar.o obj/operações/contar.o obj/operações/consultar.o obj/operações/eliminar.o obj/operações/pesquisar.o
 	$(CC) $(LDFLAGS) $^ -o $@
 	@echo "dserver compilado com sucesso!"
 
@@ -28,8 +28,14 @@ bin/dclient: obj/dclient.o obj/utils.o
 	@echo "dclient compilado com sucesso!"
 
 # Compilar os arquivos .o a partir dos .c
+# Regra para compilar arquivos dentro de src/ e garantir que os arquivos .o vão para obj/
 obj/%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o obj/$(@F)
+	@echo "$< compilado com sucesso!"
+
+# Compilar arquivos dentro de src/operações/ e garantir que os arquivos .o vão para obj/operações/
+obj/operações/%.o: src/operações/%.c
+	$(CC) $(CFLAGS) -c $< -o obj/operações/$(@F)
 	@echo "$< compilado com sucesso!"
 
 # Limpar arquivos compilados
