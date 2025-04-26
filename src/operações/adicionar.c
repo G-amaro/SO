@@ -5,6 +5,7 @@
 #include "lista_ligada.h"
 #include "ficheiro_presistencia.h"
 #include "utils.h"
+#include "cache.h"
 
 void operacao_adicionar(char* mensagem) {
     char* title = strtok(mensagem + 3, "|");
@@ -18,6 +19,7 @@ void operacao_adicionar(char* mensagem) {
         printf("next id=%d\n", next_id);
         char* resposta = add_document(title, authors, year, path, next_id, &exists);
         Document* new_doc = document_list;
+        add_to_cache(new_doc);
         add_to_persistence_file(new_doc, &exists);
         send_response_to_client(resposta);
     }

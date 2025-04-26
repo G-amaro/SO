@@ -18,10 +18,10 @@ extern Document* document_list;
 // Funções públicas da manipulação de documentos
 int get_first_document_id();
 char* add_document(char* title, char* authors, char* year, char* path, int next_id, int* exists);
-char* delete_document(char* key);
+char* delete_document(char* key, int* exist);
 char* search_document(char* key);
 void list_documents();
-char* get_path_by_id(int id); 
+Document* get_doc_by_id(int id); 
 void free_documents();
 
 #endif 

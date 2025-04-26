@@ -15,19 +15,22 @@
 #include "operações/eliminar.h"
 #include "operações/contar.h"
 #include "operações/pesquisar.h"
+#include "cache.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        fprintf(stderr, "Uso: %s <diretório de documentos>\n", argv[0]);
+    if (argc < 3) {
+        fprintf(stderr, "Uso: %s <diretório de documentos> <tamanho da cache>\n", argv[0]);
         return 1;
     }
-
+    char* folder = argv[1];
+    int size_cache = atoi(argv[2]); 
     // Inicialização
     // clear_persistence_file();
     init_persistence_file();
     list_documents_in_persistence();
     load_documents();
     list_documents();
+    init_cache(size_cache);
 
     // Criação dos FIFOs
     if (access(FIFO_PATH, F_OK) == -1 && mkfifo(FIFO_PATH, 0666) == -1) {
@@ -65,19 +68,39 @@ int main(int argc, char *argv[]) {
                 break;
 
             case 'c': {
+                char* key = strtok(mensagem + 3, "|");
                 pid_t pid = fork();
                 if (pid == 0) {
-                    operacao_consultar(mensagem);
+                    operacao_consultar(key);
+                    exit(0);
                 } else if (pid < 0) {
                     perror("Erro no fork");
                 }
+                Document* doc =get_doc_by_id(atoi(key));
+                if(doc!=NULL) add_to_cache(doc);
                 break;
             }
 
             case 'l': {
+                char* id = strtok(mensagem + 3, "|");
+                char* keyword = strtok(NULL, "|");
+                Document * doc_cache = find_in_cache(atoi(id));
+                char* filename;
+                if(doc_cache!=NULL){
+
+                    filename = doc_cache->path;
+                }else{
+                    Document* doc = get_doc_by_id(atoi(id));
+                    if (doc != NULL) {
+                        
+                        filename = doc->path;
+                        add_to_cache(doc);
+                    }
+                }
                 pid_t pid = fork();
                 if (pid == 0) {
-                    operacao_contar(mensagem, argv[1]);
+                    operacao_contar(filename, folder, keyword);
+                    exit(0);
                 } else if (pid < 0) {
                     perror("Erro no fork");
                 }
@@ -87,7 +110,8 @@ int main(int argc, char *argv[]) {
             case 's': {
                 pid_t pid = fork();
                 if (pid == 0) {
-                    operacao_pesquisar(mensagem, argv[1]);
+                    operacao_pesquisar(mensagem, folder);
+                    exit(0);
                 } else if (pid < 0) {
                     perror("Erro no fork");
                 }
@@ -96,14 +120,15 @@ int main(int argc, char *argv[]) {
             case 'f': {
                 printf("Comando de término recebido. Encerrando servidor...\n");
                 send_response_to_client("Server is shuting down");
-                save_documents_to_persistence();   // Grava dados no ficheiro
-                free_documents();                  // Liberta a memória usada pela lista ligada
+                save_documents_to_persistence();  
+                free_cache(); 
+                free_documents();                  
                 
-                close(fd);                         // Fecha o FIFO principal
-                unlink(FIFO_PATH);                 // Remove os FIFOs
+                close(fd);  
+                unlink(FIFO_PATH); 
                 unlink(FIFO_RESP_PATH);
             
-                exit(0);                           // Encerra o processo servidor
+                exit(0);
             }
             default:
                 printf("Operação desconhecida: %s\n", mensagem);
@@ -111,6 +136,7 @@ int main(int argc, char *argv[]) {
         }
 
         list_documents_in_persistence();
+        list_documents_cache();
         list_documents();
     }
 

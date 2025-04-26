@@ -65,7 +65,7 @@ char* add_document(char* title, char* authors, char* year, char* path, int next_
 
 
 
-char* delete_document(char* key) {
+char* delete_document(char* key, int* exist) {
     char* resposta = (char*)malloc(512 * sizeof(char));
     if (!resposta) {
         perror("Erro ao alocar memória para resposta");
@@ -84,6 +84,7 @@ char* delete_document(char* key) {
                 previous->next = current->next;
             }
             snprintf(resposta, 512, "Index entry %d deleted\n", current->id);
+            *exist = 1;
             free(current);
             return resposta;
         }
@@ -145,11 +146,11 @@ void list_documents() {
     }
 }
 
-char* get_path_by_id(int id) {
+Document* get_doc_by_id(int id) {
     Document* current = document_list;
     while (current != NULL) {
         if (current->id == id) {
-            return current->path;  // Retorna diretamente o ponteiro para o path
+            return current;  // Retorna diretamente o ponteiro para o path
         }
         current = current->next;
     }

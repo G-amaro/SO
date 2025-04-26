@@ -6,7 +6,6 @@
 
 char* make_mensagem(int argc, char *argv[]);
 
-// Envia uma resposta do servidor para o cliente via FIFO
 void send_response_to_client(const char* resposta);
 int search_in_file(const char* path, const char* keyword);
 int search_in_file_once(char* path, char* keyword);

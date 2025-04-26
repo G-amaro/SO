@@ -5,11 +5,11 @@
 #include "operações/contar.h"
 #include "lista_ligada.h"
 #include "utils.h"
+#include "cache.h"
 
-void operacao_contar(char* mensagem, char* folder) {
-    char* id = strtok(mensagem + 3, "|");
-    char* keyword = strtok(NULL, "|");
-    char* filename = get_path_by_id(atoi(id));
+
+void operacao_contar(char* filename, char* folder, char* keyword) {
+    
 
     if (!filename) {
         printf("Arquivo não encontrado\n");
@@ -28,6 +28,5 @@ void operacao_contar(char* mensagem, char* folder) {
         send_response_to_client(resposta);
     }
 
-    free_documents();
-    exit(0);
+
 }

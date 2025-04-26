@@ -18,7 +18,7 @@ folders:
 	@echo "Diretórios src, include, obj/operações, bin, tmp criados com sucesso."
 
 # Compilar bin/dserver
-bin/dserver: obj/dserver.o obj/lista_ligada.o obj/utils.o obj/ficheiro_presistencia.o obj/operações/adicionar.o obj/operações/contar.o obj/operações/consultar.o obj/operações/eliminar.o obj/operações/pesquisar.o
+bin/dserver: obj/dserver.o obj/lista_ligada.o obj/utils.o obj/ficheiro_presistencia.o obj/cache.o obj/operações/adicionar.o obj/operações/contar.o obj/operações/consultar.o obj/operações/eliminar.o obj/operações/pesquisar.o
 	$(CC) $(LDFLAGS) $^ -o $@
 	@echo "dserver compilado com sucesso!"
 

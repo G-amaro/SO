@@ -6,6 +6,8 @@
 #include "operações/pesquisar.h"
 #include "lista_ligada.h"
 #include "utils.h"
+#include "cache.h"
+
 void operacao_pesquisar(char* mensagem, char* folder) {
     char* keyword = strtok(mensagem + 3, "|");
     char* flag_n_proc = strtok(NULL, "|");
@@ -50,12 +52,29 @@ void operacao_pesquisar(char* mensagem, char* folder) {
             if (pid == 0) {
                 // Processo filho
                 close(pipefd[0]);
-                char full_path[512];
-                snprintf(full_path, sizeof(full_path), "%s/%s", folder, current->path);
+                
+                // Verifica se o documento está na cache
+                Document* doc_cache = find_in_cache(current->id);
+                char* filename = NULL;
 
-                int found = search_in_file_once(full_path, keyword);
-                if (found) {
-                    write(pipefd[1], &current->id, sizeof(int));
+                if (doc_cache != NULL) {
+                    filename = doc_cache->path;
+                } else {
+                    Document* doc = get_doc_by_id(current->id);
+                    if (doc != NULL) {
+                        filename = doc->path;
+                        add_to_cache(doc);
+                    }
+                }
+
+                if (filename != NULL) {
+                    char full_path[512];
+                    snprintf(full_path, sizeof(full_path), "%s/%s", folder, filename);
+
+                    int found = search_in_file_once(full_path, keyword);
+                    if (found) {
+                        write(pipefd[1], &current->id, sizeof(int));
+                    }
                 }
                 exit(0);
             } else if (pid > 0) {
@@ -66,12 +85,28 @@ void operacao_pesquisar(char* mensagem, char* folder) {
 
         } else {
             // Modo sequencial
-            char full_path[512];
-            snprintf(full_path, sizeof(full_path), "%s/%s", folder, current->path);
+            // Verifica se o documento está na cache
+            Document* doc_cache = find_in_cache(current->id);
+            char* filename = NULL;
 
-            int found = search_in_file_once(full_path, keyword);
-            if (found) {
-                write(pipefd[1], &current->id, sizeof(int));
+            if (doc_cache != NULL) {
+                filename = doc_cache->path;  // Se encontrado na cache, pega o path
+            } else {
+                doc_cache = get_doc_by_id(current->id);
+                filename = doc_cache->path; 
+                if (filename != NULL) {
+                    add_to_cache(current);  // Adiciona à cache
+                }
+            }
+
+            if (filename != NULL) {
+                char full_path[512];
+                snprintf(full_path, sizeof(full_path), "%s/%s", folder, filename);
+
+                int found = search_in_file_once(full_path, keyword);
+                if (found) {
+                    write(pipefd[1], &current->id, sizeof(int));
+                }
             }
         }
 
@@ -113,6 +148,7 @@ void operacao_pesquisar(char* mensagem, char* folder) {
         send_response_to_client(mensagem_final);
     }
 
-    free_documents();
-    exit(0);
+
+  
 }
+
