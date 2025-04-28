@@ -39,6 +39,14 @@ void operacao_pesquisar(char* mensagem, char* folder) {
     Document* current = document_list;
     int current_processes = 0;
 
+    // Alocando memória dinamicamente para a resposta
+    char* resposta = malloc(1024 * sizeof(char));  // Tamanho inicial de 1024 caracteres
+    if (resposta == NULL) {
+        send_response_to_client("Erro: falha na alocação de memória.");
+        return;
+    }
+    resposta[0] = '\0';  // Inicializa a resposta como uma string vazia
+
     while (current != NULL) {
         if (usar_processos == 1) {
             // Modo concorrente
@@ -123,7 +131,6 @@ void operacao_pesquisar(char* mensagem, char* folder) {
 
     // Lê os IDs encontrados
     int id;
-    char resposta[1024] = "";
     int first = 1;
 
     while (read(pipefd[0], &id, sizeof(int)) > 0) {
@@ -136,6 +143,15 @@ void operacao_pesquisar(char* mensagem, char* folder) {
             strcat(resposta, ", ");
             strcat(resposta, temp);
         }
+
+        // Verifica se o buffer precisa ser expandido
+        if (strlen(resposta) >= 1024) {
+            resposta = realloc(resposta, (strlen(resposta) + 1024) * sizeof(char));  // Expande o buffer
+            if (resposta == NULL) {
+                send_response_to_client("Erro: falha na realocação de memória.");
+                return;
+            }
+        }
     }
 
     close(pipefd[0]);
@@ -143,12 +159,23 @@ void operacao_pesquisar(char* mensagem, char* folder) {
     if (strlen(resposta) == 0) {
         send_response_to_client("Nenhum documento contém a palavra.");
     } else {
-        char mensagem_final[1100];
-        snprintf(mensagem_final, sizeof(mensagem_final), "[%s]", resposta);
-        send_response_to_client(mensagem_final);
+        // Concatena os parênteses retos diretamente em resposta
+        char *temp_resposta = malloc(strlen(resposta) + 3);  // Aloca espaço para os parênteses
+        if (temp_resposta == NULL) {
+            send_response_to_client("Erro: falha na alocação de memória.");
+            return;
+        }
+
+        // Adiciona os parênteses
+        snprintf(temp_resposta, strlen(resposta) + 3, "[%s]", resposta);
+
+        // Envia a resposta
+        send_response_to_client(temp_resposta);
+
+        // Libera a memória alocada
+        free(temp_resposta);
     }
 
-
-  
+    // Libera a memória alocada para a resposta
+    free(resposta);
 }
-

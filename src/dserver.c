@@ -24,12 +24,14 @@ int main(int argc, char *argv[]) {
     }
     char* folder = argv[1];
     int size_cache = atoi(argv[2]); 
+
+
     // Inicialização
     // clear_persistence_file();
     init_persistence_file();
-    list_documents_in_persistence();
+    //list_documents_in_persistence();
     load_documents();
-    list_documents();
+    //list_documents();
     init_cache(size_cache);
 
     // Criação dos FIFOs
@@ -135,9 +137,9 @@ int main(int argc, char *argv[]) {
                 break;
         }
 
-        list_documents_in_persistence();
-        list_documents_cache();
-        list_documents();
+        //list_documents_in_persistence();
+        //list_documents_cache();
+        //list_documents();
     }
 
     close(fd);

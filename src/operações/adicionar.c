@@ -16,7 +16,6 @@ void operacao_adicionar(char* mensagem) {
 
     if (title && authors && year && path) {
         int next_id = get_first_document_id() + 1;
-        printf("next id=%d\n", next_id);
         char* resposta = add_document(title, authors, year, path, next_id, &exists);
         Document* new_doc = document_list;
         add_to_cache(new_doc);

@@ -65,6 +65,7 @@ char* make_mensagem(int argc, char *argv[]) {
     return mensagem;
 }
 
+
 void send_response_to_client(const char* resposta) {
     int fd_resp = open(FIFO_RESP_PATH, O_WRONLY);
     if (fd_resp == -1) {
@@ -72,10 +73,23 @@ void send_response_to_client(const char* resposta) {
         return;
     }
 
-    write(fd_resp, resposta, strlen(resposta) + 1);
+    // Enviar o tamanho da mensagem
+    int tamanho = strlen(resposta) + 1;
+    if (write(fd_resp, &tamanho, sizeof(int)) == -1) {
+        perror("Erro ao enviar tamanho da resposta");
+        close(fd_resp);
+        return;
+    }
+
+    // Enviar a mensagem real
+    if (write(fd_resp, resposta, tamanho) == -1) {
+        perror("Erro ao enviar mensagem");
+        close(fd_resp);
+        return;
+    }
+
     close(fd_resp);
 }
-
 // Devolve número de linhas que contêm a keyword ou -1 em caso de erro
 int search_in_file(const char* path, const char* keyword) {
     int pipefd[2];

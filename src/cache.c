@@ -76,7 +76,6 @@ void add_to_cache(Document *doc) {
     new_entry->next = cache_head;
     cache_head = new_entry;
     cache_size++;
-    printf("\n\n\n\n\nkavchgvacghvaedhgkv\n\n\n\n\n");
     if (cache_size > cache_max_size) {
         remove_last_from_cache();
     }
