@@ -33,7 +33,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    printf("Pedido enviado para o servidor.\n");
 
     // Liberar a memória da mensagem
     free(mensagem);
@@ -78,7 +77,7 @@ int main(int argc, char *argv[]) {
     }
 
     resposta[tamanho_resposta-1] = '\0'; // Garantir que a resposta termina com '\0'
-    printf("Resposta do servidor: %s\n", resposta);
+    printf("%s\n", resposta);
 
     free(resposta);
     close(fd_resp);

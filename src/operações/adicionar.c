@@ -19,7 +19,7 @@ void operacao_adicionar(char* mensagem) {
         char* resposta = add_document(title, authors, year, path, next_id, &exists);
         Document* new_doc = document_list;
         add_to_cache(new_doc);
-        add_to_persistence_file(new_doc, &exists);
+        //add_to_persistence_file(new_doc, &exists);
         send_response_to_client(resposta);
     }
 }

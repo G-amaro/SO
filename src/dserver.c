@@ -23,15 +23,27 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     char* folder = argv[1];
-    int size_cache = atoi(argv[2]); 
-
+    int size_cache = atoi(argv[2]), check = 0, erase = 0;
+    if(argv[3]!=NULL){
+        if(strcmp(argv[3],"check")==0) {
+            check=1;
+            printf("check active!!!\n");
+        } else if(strcmp(argv[3],"erase")==0){
+            erase=1;
+            printf("erase active!!!\n");
+        } else if(strcmp(argv[3],"check_erase")==0){
+            check=1;
+            erase=1;
+            printf("check and erase active!!!\n");
+        }
+    }
 
     // Inicialização
-    // clear_persistence_file();
+    if(erase) clear_persistence_file();
     init_persistence_file();
-    //list_documents_in_persistence();
+    if(check) list_documents_in_persistence();
     load_documents();
-    //list_documents();
+    if(check) list_documents();
     init_cache(size_cache);
 
     // Criação dos FIFOs
@@ -136,14 +148,14 @@ int main(int argc, char *argv[]) {
                 printf("Operação desconhecida: %s\n", mensagem);
                 break;
         }
-
-        //list_documents_in_persistence();
-        //list_documents_cache();
-        //list_documents();
+        if (check){
+            list_documents_in_persistence();
+            if(operacao !='f') { //se a operação for f entao a cache e a base de dados ja terão tido as suas memorias libertadas
+                list_documents_cache();
+                list_documents();
+            }
+        }
     }
 
-    close(fd);
-    free_documents();
-    save_documents_to_persistence();
     return 0;
 }
