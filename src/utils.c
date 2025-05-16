@@ -9,7 +9,6 @@
 
 
 
-// Função para criar a mensagem a ser enviada ao servidor
 char* make_mensagem(int argc, char *argv[]) {
     char *mensagem = (char*)malloc(512 * sizeof(char));
     if (mensagem == NULL) {
@@ -38,7 +37,6 @@ char* make_mensagem(int argc, char *argv[]) {
 
         case 4:
             if (strcmp(argv[1], "-l") == 0) {
-                // operação -l com key e palavra-chave
                 snprintf(mensagem, 512, "%s|%s|%s", argv[1], argv[2], argv[3]);
             } else if(strcmp(argv[1], "-s")==0){
                 snprintf(mensagem, 512, "%s|%s|%d|%s", argv[1], argv[2], 1, argv[3]);
@@ -49,7 +47,6 @@ char* make_mensagem(int argc, char *argv[]) {
             break;
         case 6:
             if (strcmp(argv[1], "-a") == 0) {
-                // operação -a title authors year path
                 snprintf(mensagem, 512, "%s|%s|%s|%s|%s", argv[1], argv[2], argv[3], argv[4], argv[5]);
             } else {
                 free(mensagem);
@@ -73,7 +70,6 @@ void send_response_to_client(const char* resposta) {
         return;
     }
 
-    // Enviar o tamanho da mensagem
     int tamanho = strlen(resposta) + 1;
     if (write(fd_resp, &tamanho, sizeof(int)) == -1) {
         perror("Erro ao enviar tamanho da resposta");
@@ -81,7 +77,6 @@ void send_response_to_client(const char* resposta) {
         return;
     }
 
-    // Enviar a mensagem real
     if (write(fd_resp, resposta, tamanho) == -1) {
         perror("Erro ao enviar mensagem");
         close(fd_resp);
@@ -90,7 +85,7 @@ void send_response_to_client(const char* resposta) {
 
     close(fd_resp);
 }
-// Devolve número de linhas que contêm a keyword ou -1 em caso de erro
+
 int search_in_file(const char* path, const char* keyword) {
     int pipefd[2];
     if (pipe(pipefd) == -1) {
@@ -105,30 +100,26 @@ int search_in_file(const char* path, const char* keyword) {
     }
 
     if (pid == 0) {
-        // Processo filho
-        close(pipefd[0]); // Fecha leitura
+        close(pipefd[0]);
 
-        // Redireciona stdout para o pipe
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
 
-        // Executa grep -c keyword path
         execlp("grep", "grep", "-c", keyword, path, NULL);
 
-        // Se execlp falhar
         perror("Erro no execlp");
         exit(1);
     } else {
-        // Processo pai
-        close(pipefd[1]); // Fecha escrita
+        
+        close(pipefd[1]); 
 
         char buffer[32] = {0};
         read(pipefd[0], buffer, sizeof(buffer));
         close(pipefd[0]);
 
-        wait(NULL); // Espera que o filho termine
+        wait(NULL); 
 
-        return atoi(buffer);  // Converte e devolve o número de linhas
+        return atoi(buffer);  
     }
 }
 
@@ -146,33 +137,27 @@ int search_in_file_once(char* path, char* keyword) {
     }
 
     if (pid == 0) {
-        // Processo filho
-        close(pipefd[0]); // Fecha leitura do pipe
+        close(pipefd[0]);
 
-        // Redireciona stdout para o pipe
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
 
-        // Executa o comando grep -q para verificar se o arquivo contém a palavra-chave
         execlp("grep", "grep", "-q", keyword, path, (char*)NULL);
 
-        // Se execlp falhar
         perror("Erro ao executar execlp");
         exit(1);
     } else {
-        // Processo pai
-        close(pipefd[1]); // Fecha escrita do pipe
+        close(pipefd[1]); 
 
         int status;
-        waitpid(pid, &status, 0);  // Espera o processo filho terminar
+        waitpid(pid, &status, 0);  
 
-        // Verifica o status do filho
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
             close(pipefd[0]);
-            return 1;  // Palavra-chave encontrada
+            return 1;  
         }
 
         close(pipefd[0]);
-        return 0;  // Palavra-chave não encontrada
+        return 0; 
     }
 }

@@ -8,10 +8,10 @@ Document* document_list = NULL;
 int get_first_document_id() {
     if (document_list == NULL) {
         printf("A lista de documentos está vazia.\n");
-        return 0;  // Retorna -1 se a lista estiver vazia
+        return 0; 
     }
 
-    return document_list->id;  // Retorna o ID do primeiro documento
+    return document_list->id;  
 }
 
 char* add_document(char* title, char* authors, char* year, char* path, int next_id, int* exists) {
@@ -118,7 +118,6 @@ char* search_document(char* key) {
         current = current->next;
     }
 
-    // Se não encontrar o documento, retorna uma mensagem de erro
     snprintf(resposta, 512, "Documento com ID=%d não encontrado", id_to_search);
     printf("%s\n", resposta);  
     return resposta;
@@ -150,11 +149,11 @@ Document* get_doc_by_id(int id) {
     Document* current = document_list;
     while (current != NULL) {
         if (current->id == id) {
-            return current;  // Retorna diretamente o ponteiro para o path
+            return current;  
         }
         current = current->next;
     }
-    return NULL;  // Se não encontrar o documento
+    return NULL;  
 }
 
 
