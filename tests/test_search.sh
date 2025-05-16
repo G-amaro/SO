@@ -2,10 +2,10 @@
 
 KEYWORD="huge"
 
-PROCESS_COUNTS=(1 2 4 8)
+PROCESS_COUNTS=(1 2 4 8 16 32 64)
 DOCS_DIR="./docs/Gdataset"
 SERVER="./bin/dserver"
-EXTRA="erase"
+EXTRA=""
 
 RESULTS=""
 

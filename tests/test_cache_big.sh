@@ -4,9 +4,9 @@ DOCS_DIR="docs/Gdataset"
 SERVER="./bin/dserver"
 CLIENT="./bin/dclient"
 KEYWORD="praia"
-EXTRA="erase"
+EXTRA=""
 
-CACHE_SIZES=(1 5 10 20)
+CACHE_SIZES=(1 5 10 20 100 500)
 RESULTS=""
 
 for size in "${CACHE_SIZES[@]}"; do
@@ -17,20 +17,13 @@ for size in "${CACHE_SIZES[@]}"; do
     $SERVER "$DOCS_DIR" "$size" "$EXTRA" &
     SERVER_PID=$!
 
+    # Esperar o servidor iniciar
     sleep 1
-
-    echo "Indexação de documentos..."
-    for file in "$DOCS_DIR"/*.txt; do
-        title=$(basename "$file" .txt)
-        $CLIENT -a "$title" "Autor" "2020" "$(basename "$file")" > /dev/null
-    done
 
     echo "Realizando pesquisa com cache_size = $size..."
     # Medir tempo de execução e salvar em variável
     TIMEFORMAT="%R"
     exec_time=$( { time $CLIENT -s "$KEYWORD" 4 > /dev/null; } 2>&1 )
-
-
 
     # Parar servidor
     $CLIENT -f > /dev/null

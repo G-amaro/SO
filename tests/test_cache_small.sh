@@ -4,9 +4,9 @@ DOCS_DIR="docs/my docs"
 SERVER="./bin/dserver"
 CLIENT="./bin/dclient"
 KEYWORD="praia"
-EXTRA="erase"
+EXTRA=""
 
-CACHE_SIZES=(1 5 10 20)
+CACHE_SIZES=(1 5 10 20 100 500)
 RESULTS=""
 
 for size in "${CACHE_SIZES[@]}"; do
@@ -14,26 +14,26 @@ for size in "${CACHE_SIZES[@]}"; do
     echo "Inicializando servidor com cache_size = $size"
 
     # Iniciar servidor em background
-    $SERVER "$DOCS_DIR" "$size" "$EXTRA" &
+    "$SERVER" "$DOCS_DIR" "$size" "$EXTRA" &
     SERVER_PID=$!
 
+    # Esperar o servidor iniciar
     sleep 1
 
-    echo "Indexação de documentos..."
-    for file in "$DOCS_DIR"/*.txt; do
-        title=$(basename "$file" .txt)
-        $CLIENT -a "$title" "Autor" "2020" "$(basename "$file")" > /dev/null
+    echo "Indexando ficheiros..."
+    for i in {1..8}; do
+        FILE="file${i}.txt"
+        TITLE="file${i}"
+        "$CLIENT" -a "$TITLE" "Autor" "2020" "$FILE" > /dev/null
     done
 
     echo "Realizando pesquisa com cache_size = $size..."
     # Medir tempo de execução e salvar em variável
     TIMEFORMAT="%R"
-    exec_time=$( { time $CLIENT -s "$KEYWORD" 4 > /dev/null; } 2>&1 )
-
-
+    exec_time=$( { time "$CLIENT" -s "$KEYWORD" 4 > /dev/null; } 2>&1 )
 
     # Parar servidor
-    $CLIENT -f > /dev/null
+    "$CLIENT" -f > /dev/null
     wait $SERVER_PID
 
     # Guardar resultado formatado
