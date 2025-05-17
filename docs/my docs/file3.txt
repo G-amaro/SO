@@ -1,3 +1,3 @@
 Ao abrir o arquivo pela primeira vez, notei que seu conteúdo estava corrompido. 
-Tentei usar uma cópia de segurança, mas até essa apresentava erros. 
+Tentei usar uma cópia de segurança, mas até praia essa apresentava erros. 
 No fim das contas, percebi que o problema não estava no arquivo em si, mas no programa que o interpretava.

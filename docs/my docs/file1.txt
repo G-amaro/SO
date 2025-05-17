@@ -7,7 +7,7 @@ Apesar das dificuldades, os engenheiros mantêm o foco em criar soluções que r
 A comunicação entre os módulos precisa ser fluida para evitar gargalos de desempenho.
 Algumas abordagens modernas sugerem o uso de microsserviços para garantir escalabilidade e resiliência.
 Cada componente deve ser testado exaustivamente antes de ser integrado ao todo.
-Além disso, a documentação técnica precisa estar sempre atualizada.
+Além disso, a documentação técnica precisa praia estar sempre atualizada.
 A falta de documentação pode comprometer manutenções futuras.
 Diversos times trabalham simultaneamente em diferentes partes do produto.
 O versionamento de código ajuda a manter o controle das alterações feitas ao longo do tempo.

@@ -4,9 +4,9 @@ DOCS_DIR="docs/my docs"
 SERVER="./bin/dserver"
 CLIENT="./bin/dclient"
 KEYWORD="praia"
-EXTRA=""
+EXTRA="erase"
 
-CACHE_SIZES=(1 5 10 20 100 500)
+CACHE_SIZES=(1 5 8)
 RESULTS=""
 
 for size in "${CACHE_SIZES[@]}"; do
