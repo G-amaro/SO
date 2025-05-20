@@ -4,7 +4,7 @@ DOCS_DIR="docs/my docs"
 SERVER="./bin/dserver"
 CLIENT="./bin/dclient"
 KEYWORD="praia"
-EXTRA="erase"
+EXTRA=""
 
 CACHE_SIZES=(1 5 8)
 RESULTS=""
